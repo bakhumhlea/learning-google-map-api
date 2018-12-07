@@ -1,0 +1,240 @@
+
+#map {
+  height: 400px;  /* The height is 400 pixels */
+  width: 100%;  /* The width is the width of the web page */
+  border-radius: 6px;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+}
+body {
+  font-family: 'Poppins','Titillium Web','Merriweather Sans','Kanit','Bitter',sans-serif, serif;
+  font-size: 16px;
+}
+h1 {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+input {
+  border: none;
+}
+button {
+  border: none;
+}
+.app {
+  padding: 20px;
+}
+.font-face span {
+  display: inline-block;
+  font-size: 1.2rem;
+  /* color: white; */
+  height: 50px;
+  margin: 0 5px;
+  /* background-color: rgb(18, 114, 170); */
+  /* border-radius: 6px; */
+  /* box-shadow: 0 0 10px 4px rgba(0,0,0,0.1); */
+}
+.poppins {
+  font-family: 'Poppins', sans-serif;
+}
+.titillum {
+  font-family: 'Titillium Web', sans-serif;
+}
+.merriweather {
+  font-family: 'Merriweather Sans', sans-serif;
+}
+.kanit {
+  font-family: 'Kanit', sans-serif;
+}
+.bitter {
+  font-family: 'Bitter', serif;
+}
+
+.btn.open-modal {
+  color: black;
+  background-color: white;
+}
+.business-form {
+  z-index: 10;
+  position: relative;
+  z-index: 5;
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px 0;
+  /* border: 1px solid rgb(206, 206, 206); */
+  border-radius: 6px;
+  font-family: 'Merriweather Sans','sans-serif';
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+}
+.form-group {
+  width: 100%;
+  margin: 20px 0;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 200;
+}
+.form-group label {
+  display: block;
+  width: 100%;
+}
+.form-group input {
+  display: block;
+  height: 3rem;
+  width: 100%;
+  font-family: 'Merriweather Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 200;
+  padding: 0 10px 0 10px;
+  border-radius: 4px;
+  margin: 10px auto;
+  box-shadow: 0 0 6px 2px rgba(65, 50, 102, 0.1);
+}
+.form-group-btn {
+  margin: 40px 0;
+}
+.btn {
+  width: 100%;
+  height: 3.5rem;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: white;
+  border-radius: 2rem;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+  transition: 0.5s 0s all cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+.btn:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 10px 2px rgba(0,0,0,0.2);
+}
+.btn:active {
+  transform: translateY(-4px);
+  box-shadow: 0 5px 5px 2px rgba(0,0,0,0.2);
+}
+.form-group-btn input.btn.submit {
+  color: white;
+  background-image: linear-gradient(rgb(98, 18, 202), rgb(170, 30, 95));
+}
+.btn.toggle {
+  margin: 20px 0;
+  border: none;
+  color: white;
+  background-image: linear-gradient(rgb(214, 5, 194), rgb(205, 4, 43));
+}
+.modal-group {
+  display: none;
+  z-index: 50;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(20px);
+}
+.modal {
+  position: fixed;
+  z-index: 100;
+  top: -50vh;
+  left: 50vw;
+  font-family: 'Merriweather Sans','sans-serif';
+  width: 60%;
+  height: 90vh;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.1);
+  transform: translate(-50%,-55%);
+  transition: 0.6s 0s all cubic-bezier(0.075, 0.82, 0.165, 1);
+  /* opacity: 0; */
+  overflow: scroll;
+}
+.modal-backdrop {
+  z-index: 90;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0,0,0);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+}
+.top-bar {
+  margin: 0 0 20px 0;
+}
+.btn-close {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgb(255, 244, 247);
+}
+.info-text-group {
+  padding: 20px;
+}
+.info-text {
+  font-weight: 600;
+}
+.info-text span {
+  font-weight: 200;
+}
+
+/* custom popup */
+.popup-tip-anchor {
+  height: 0;
+  position: absolute;
+  /* The max width of the info window. */
+  width: 200px;
+}
+/* The bubble is anchored above the tip. */
+.popup-bubble-anchor {
+  position: absolute;
+  width: 100%;
+  bottom: /* TIP_HEIGHT= */ 8px;
+  left: 0;
+}
+.circle {
+  z-index: 20;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background-image: linear-gradient(rgb(98, 18, 202), rgb(170, 30, 95));
+}
+/* Draw the tip. */
+.popup-bubble-anchor::after {
+  z-index: 10;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Center the tip horizontally. */
+  transform: translate(-50%, 0);
+  /* The tip is a https://css-tricks.com/snippets/css/css-triangle/ */
+  width: 0;
+  height: 0;
+  /* The tip is 12px high, and 20px wide. */
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: /* TIP_HEIGHT= */ 12px solid white;
+}
+/* The popup bubble itself. */
+.popup-bubble-content {
+  color: rgb(71, 20, 119);
+  font-weight: 600;
+  font-size: 1rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -85%);
+  background-color: white;
+  padding: 3px;
+  border-radius: 50%;
+  font-family: sans-serif;
+  overflow-y: auto;
+  height: 20px;
+  width: 20px;
+  box-shadow: 0px 2px 10px 1px rgba(0,0,0,0.5);
+}
