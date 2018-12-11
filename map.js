@@ -4,9 +4,10 @@ var map,
  destination, 
  directionsService, 
  directionsDisplay, 
- geocoder;
+ geocoder,
+ placesService;
 
-var popup, Popup;
+var currentInfoText = `<strong>You are here</strong>`;
 
 var markers = {
   currentPosition: null,
@@ -95,7 +96,7 @@ var mapStyle = [
     stylers: [{color: '#17263c'}]
   }
 ];
-var defaultZoom = 16;
+var defaultZoom = 14;
 const SF = {lat: 37.7749, lng: -122.4194};
 
 function initMap() {
@@ -118,6 +119,7 @@ function initMap() {
   directionsDisplay = new google.maps.DirectionsRenderer();
   infoWindow = new google.maps.InfoWindow;
   geocoder = new google.maps.Geocoder();
+  placesService = new google.maps.places.PlacesService(map);
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -125,6 +127,8 @@ function initMap() {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       };
+      markers.currentPosition = createMarker(currentPosition, map);
+      setInfoWindow(infoWindow, currentInfoText, markers.currentPosition, map);
     }, function() {
       handleLocationError(true, infoWindow, map.getCenter());
     });
@@ -134,151 +138,40 @@ function initMap() {
   }
 
   document.getElementById('submit').addEventListener('click', function() {
-    geocodeAddress(geocoder, map, infoWindow);
+    var firstname = document.getElementById('first').value;
+    var lastname = document.getElementById('last').value;
+    var email = document.getElementById('email').value;
+    var businessName = document.getElementById('business-name').value;
+    var businessAddress = document.getElementById('business-address').value;
+
+    data = {
+      firstname: firstname,
+      lastname: lastname,
+      email: email,
+      businessName: businessName,
+      businessAddress: null,
+      location: {
+        lat: null,
+        lng: null
+      }
+    };
+
+    geocodeAddress(businessAddress, geocoder, map, infoWindow, placesService);
   });
 
 }
 
-function geocodeAddress(geocoder, map, infowindow) {
-  var firstname = document.getElementById('first').value;
-  var lastname = document.getElementById('last').value;
-  var email = document.getElementById('email').value;
-  var businessName = document.getElementById('business-name').value;
-  var businessAddress = document.getElementById('business-address').value;
-
-  geocoder.geocode({'address': businessAddress}, function(results, status) {
-    if (status === 'OK') {
-      
-      map.setCenter(results[0].geometry.location);
-      map.setZoom(18);
-
-      destination = results[0].geometry.location;
-
-      var lat = results[0].geometry.location.lat();
-      var lng = results[0].geometry.location.lng();
-
-      var data = {
-        firstname: firstname,
-        lastname: lastname,
-        email: email,
-        businessName: businessName,
-        businessAddress: results[0].formatted_address,
-        location: {
-          lat: lat,
-          lng: lng
-        }
-      };
-
-      // markers.destination = new google.maps.Marker({
-      //   position: destination,
-      //   map: map,
-      //   animation: google.maps.Animation.DROP,
-      //   label: "B",
-      // });
-
-      // markers.currentPosition = new google.maps.Marker({
-      //   position: currentPosition,
-      //   map: map,
-      //   title: 'Your current location',
-      //   label: "A",
-      // });
-
-      showModal(data);
-      clearFormFields();
-
-      definePopupClass();
-
-      popup = new Popup(
-        destination,
-        document.getElementById('content'));
-        
-      popup.setMap(map);
-
-      // setInfowindow(destination, businessName, infowindow, map);
-      // infowindow.setContent("You are here!");
-      // infowindow.open(map, currentMarker);
-
-      // createRoutePath(currentPosition, data.location, "WALKING", map);
-      
-    } else {
-      alert('Geocode was not successful for the following reason: ' + status);
-    }
-  });
+function addDataToField(data) {
+  if (data) {
+    document.getElementById("info-firstname").textContent = data.firstname;
+    document.getElementById("info-lastname").textContent = data.lastname;
+    document.getElementById("info-email").textContent = data.email;
+    document.getElementById("info-business-name").textContent = data.businessName;
+    document.getElementById("info-address").textContent = data.businessAddress;
+    document.getElementById("lat-value").textContent = data.location.lat >= 0 ? `${data.location.lat} N˚`:`${data.location.lat*(-1)} S˚`;
+    document.getElementById("lng-value").textContent = data.location.lng >= 0 ? `${data.location.lng} E˚`:`${data.location.lng*(-1)} W˚`;
+  }
 }
-
-function definePopupClass() {
-  /**
-   * A customized popup on the map.
-   * @param {!google.maps.LatLng} position
-   * @param {!Element} content
-   * @constructor
-   * @extends {google.maps.OverlayView}
-   */
-  Popup = function(position, content) {
-    this.position = position;
-
-    content.classList.add('popup-bubble-content');
-
-    var pixelOffset = document.createElement('div');
-    pixelOffset.classList.add('popup-bubble-anchor');
-    pixelOffset.appendChild(content);
-
-    this.anchor = document.createElement('div');
-    this.anchor.classList.add('popup-tip-anchor');
-    this.anchor.appendChild(pixelOffset);
-
-    // Optionally stop clicks, etc., from bubbling up to the map.
-    this.stopEventPropagation();
-  };
-  // NOTE: google.maps.OverlayView is only defined once the Maps API has
-  // loaded. That is why Popup is defined inside initMap().
-  Popup.prototype = Object.create(google.maps.OverlayView.prototype);
-
-  /** Called when the popup is added to the map. */
-  Popup.prototype.onAdd = function() {
-    this.getPanes().floatPane.appendChild(this.anchor);
-  };
-
-  /** Called when the popup is removed from the map. */
-  Popup.prototype.onRemove = function() {
-    if (this.anchor.parentElement) {
-      this.anchor.parentElement.removeChild(this.anchor);
-    }
-  };
-
-  /** Called when the popup needs to draw itself. */
-  Popup.prototype.draw = function() {
-    var divPosition = this.getProjection().fromLatLngToDivPixel(this.position);
-    // Hide the popup when it is far out of view.
-    var display =
-        Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000 ?
-        'block' :
-        'none';
-
-    if (display === 'block') {
-      this.anchor.style.left = divPosition.x + 'px';
-      this.anchor.style.top = divPosition.y + 'px';
-    }
-    if (this.anchor.style.display !== display) {
-      this.anchor.style.display = display;
-    }
-  };
-
-  /** Stops clicks/drags from bubbling up to the map. */
-  Popup.prototype.stopEventPropagation = function() {
-    var anchor = this.anchor;
-    anchor.style.cursor = 'auto';
-
-    ['click', 'dblclick', 'contextmenu', 'wheel', 'mousedown', 'touchstart',
-     'pointerdown']
-        .forEach(function(event) {
-          anchor.addEventListener(event, function(e) {
-            e.stopPropagation();
-          });
-        });
-  };
-}
-
 function clearFormFields() {
   document.getElementById('first').value = "";
   document.getElementById('last').value = "";
@@ -287,42 +180,169 @@ function clearFormFields() {
   document.getElementById('business-address').value = "";
 }
 
-function createRoutePath(from, to, travelmode, map) {
+function createPlaceContentHTML(icon, name, types) {
+  return (`
+    <img src="${icon}" class="pin-icon"/>
+    <div class="pin-icon-info">
+      <p><strong>${name}</strong></p>
+      <p>${types}</p>
+    </div>
+  `);
+}
 
-  directionsDisplay.setMap(map);
+var data;
 
-  var request = {
-    origin: from,
-    destination: to,
-    travelMode: google.maps.TravelMode[travelmode]
-  };
+function geocodeAddress(address, geocoder, map, infowindow, placesservice) {
+  geocoder.geocode({'address': address}, function(results, status) {
+    if (status === 'OK') {
+      map.setCenter(results[0].geometry.location);
+      map.setZoom(16);
 
-  directionsService.route(request, function(response, status) {
-    if (status == 'OK') {
-      directionsDisplay.setDirections(response);
+      destination = results[0].geometry.location;
+      
+      data.businessAddress = results[0].formatted_address;
+      data.location.lat = results[0].geometry.location.lat();
+      data.location.lng = results[0].geometry.location.lng();
+
+      var request = {
+        placeId: results[0].place_id,
+        fields: ['name', 'icon', 'rating', 'geometry', 'type']
+      };
+      
+      placesservice.getDetails(request, function(place, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+          var types = getPlaceTypes(place.types);
+          var content = createPlaceContentHTML(place.icon, place.name, types.slice(0,3).join(', '));
+          markers.destination = createMarker(destination, map);
+          setInfoWindow(infowindow, content, markers.destination, map);
+        }
+      });
+
+      showMap();
+      addDataToField(data);
+      clearFormFields();
+    } else {
+      alert('Geocode was not successful for the following reason: ' + status);
     }
+    console.log(data);
   });
 }
 
-function removeRoutePath() {
-  // destination.setMap(null);
-  // markers.currentPosition.setMap(null);
-  if(markers.destination) {
-    markers.destination.setMap(null);
-  }
-  directionsDisplay.setMap(null);
+function getPlaceTypes(placetypes) {
+  var types = [];
+  placetypes.forEach(type => types.push(type.split("_").join(' ').charAt(0).toUpperCase() + type.split("_").join(' ').substr(1)));
+  return types;
 }
 
-var searchRouteBtn = document.getElementById("search-route-btn");
-var routeShown = false;
+function createMarker(position, map) {
+  return new google.maps.Marker({
+    position: position,
+    map: map,
+    animation: google.maps.Animation.DROP,
+  });
+}
 
-searchRouteBtn.onclick = function toggleRoute() {
-  if (routeShown) {
-    removeRoutePath();
-    routeShown = false;
+function setInfoWindow(infowindow, content, marker, map) {
+  infowindow.setContent(content);
+  infowindow.open(map, marker);
+}
+
+function showMap() {
+  if (!markers.destination) {
+    centerAtMarker(markers.currentPosition, map, 16);
+    setInfoWindow(infoWindow, currentInfoText, markers.currentPosition, map );
+  }
+  toggleModal(true);
+}
+
+function closeMap() {
+  removeRoutePath(map);
+  if (markers.destination) {
+    markers.destination.setMap(null);
+    markers.destination = null;
+  }
+  toggleModal(false);
+}
+
+var btnOpen = document.getElementById("open-modal");
+var btnClose = document.getElementById("close-modal-btn");
+var modalBackdrop = document.getElementById("close-modal-backdrop");
+
+btnOpen.onclick = showMap;
+btnClose.onclick = closeMap;
+modalBackdrop.onclick = closeMap;
+
+function centerAtMarker(marker, map, zoomfactor) {
+  marker.setMap(map);
+  map.setCenter({
+    lat: marker.position.lat(),
+    lng: marker.position.lng()
+  });
+  map.setZoom(zoomfactor);
+}
+var travelTypeShown = null;
+
+// Calculate route path and display on map
+function createRoutePath(from, to, travelmode, map) {
+  
+  directionsDisplay.setMap(map);
+
+  if (from && to && travelmode) {
+    travelTypeShown = travelmode;
+    var request = {
+      origin: from,
+      destination: to,
+      travelMode: google.maps.TravelMode[travelmode],
+    };
+  
+    directionsService.route(request, function(response, status) {
+      if (status == 'OK') {
+        document.getElementById("tra-dis").textContent = response.routes[0].legs[0].distance.text;
+        document.getElementById("tra-dur").textContent = response.routes[0].legs[0].duration.text;
+        toggleRouteInfo(true);
+        directionsDisplay.setDirections(response);
+      }
+    });
+    return true;
   } else {
-    createRoutePath(currentPosition, destination, "WALKING", map);
-    routeShown = true;
+    console.log("Needs Start and Finish Location to create route path on map");
+    return false;
+  }
+}
+// Hide route path from map
+function removeRoutePath(map) {
+  if (markers.destination) {
+    centerAtMarker(markers.destination, map, 16);
+  }
+  removeClassAll(routeBtns, "active-route", null);
+  directionsDisplay.setMap(null);
+  travelTypeShown = null;
+
+  toggleRouteInfo(false);
+}
+
+// Initialize routeBtns
+var routeBtns = document.getElementsByClassName("route-btn");
+
+(function initialRouteBtn() {
+  var btns = [];
+  for (const index in routeBtns) {
+    if (routeBtns.hasOwnProperty(index)) {
+      const element = routeBtns[index];
+      element.onclick = toggleRoute
+    }
+  }
+})();
+
+function toggleRoute(event) {
+  if (travelTypeShown === event.target.value) {
+    removeRoutePath(map);
+  } else {
+    var result = createRoutePath(currentPosition, destination, event.target.value , map);
+    if (!result) {
+      return
+    }
+    removeClassAll(routeBtns, "active-route", event.target);
   }
 }
 
@@ -337,46 +357,66 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 // UI javascript
 var modalGroup = document.getElementById("modal-group");
 var targetModal = document.getElementById("info-modal");
-var modalBackdrop = document.getElementById("close-modal-backdrop");
+var travelInfo = document.getElementById("route-info");
 
-function showModal(data) {
-  if (data) {
-    document.getElementById("info-firstname").textContent = data.firstname;
-    document.getElementById("info-lastname").textContent = data.lastname;
-    document.getElementById("info-email").textContent = data.email;
-    document.getElementById("info-business-name").textContent = data.businessName;
-    document.getElementById("info-address").textContent = data.businessAddress;
-    document.getElementById("lat-value").textContent = data.location.lat >= 0 ? `${data.location.lat} N˚`:`${data.location.lat*(-1)} S˚`;
-    document.getElementById("lng-value").textContent = data.location.lng >= 0 ? `${data.location.lng} E˚`:`${data.location.lng*(-1)} W˚`;
+function toggleClass(el, classname) {
+  el.classList.toggle(classname);
+}
+// Remove all class
+function removeClassAll(elements,  classname, exception) {
+  if (typeof elements === 'object') {
+    for (const el in elements) {
+      if (elements.hasOwnProperty(el)) {
+        var element = elements[el];
+        if (exception && element === exception) {
+          element.classList.toggle(classname, true);
+          // console.log(element === exception);
+        } else {
+          element.classList.toggle(classname, false);
+        }
+      }
+    }
+  } else {
+    elements.forEach(el => {
+      if (el === exception) {
+        el.classList.toggle(classname, true);
+      } else {
+        el.classList.toggle(classname, false);
+      }
+    });
   }
-
-  modalGroup.style.display = "block";
-  var displayTimer = setInterval(() => {
-    targetModal.style.zIndex = 100;
-    targetModal.style.opacity = 1;
-    targetModal.style.top = "50vh";
-    targetModal.style.transform = "translate(-50%, -50%)";
-    modalBackdrop.style.opacity = 0.5;
-    clearInterval(displayTimer);
-  }, 0);
 }
-var btnOpen = document.getElementById("open-modal");
-var btnClose = document.getElementById("close-modal-btn");
 
-function closeModal() {
-  removeRoutePath();
-
-  targetModal.style.transform = "translate(-50%, -55%)";
-  targetModal.style.opacity = 0;
-  modalBackdrop.style.opacity = 0;
-
-  var displayTimer = setInterval(() => {
-    modalGroup.style.display = "none";
-    clearInterval(displayTimer);
-  }, 700);
+function toggleRouteInfo(boolean) {
+  if (boolean) {
+    travelInfo.style.width = "90%";
+    travelInfo.style.opacity = 1;
+  } else {
+    travelInfo.style.width = 0;
+    travelInfo.style.opacity = 0;
+  }
 }
-btnOpen.onclick = () => {
-  showModal(null);
-};
-btnClose.onclick = closeModal;
-modalBackdrop.onclick = closeModal;
+
+
+function toggleModal(boolean) {
+  if (boolean) {
+    modalGroup.style.display = "block";
+    var displayTimer = setInterval(() => {
+      targetModal.style.zIndex = 100;
+      targetModal.style.opacity = 1;
+      targetModal.style.top = "50vh";
+      targetModal.style.transform = "translate(-50%, -50%)";
+      modalBackdrop.style.opacity = 0.5;
+      clearInterval(displayTimer);
+    }, 0);
+  } else {
+    targetModal.style.transform = "translate(-50%, -55%)";
+    targetModal.style.opacity = 0;
+    modalBackdrop.style.opacity = 0;
+
+    var displayTimer = setInterval(() => {
+      modalGroup.style.display = "none";
+      clearInterval(displayTimer);
+    }, 700);
+  }
+}

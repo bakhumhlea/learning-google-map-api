@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link href="map-style.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Bitter:400,700|Kanit:200,300,400,500,600,700|Merriweather+Sans:300|Poppins:200,300,400,500|Titillium+Web:300,400,600,700&amp;subset=thai" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <title>Lokals Business Page Prototype</title>
 </head>
 <body>
@@ -48,20 +49,31 @@
             </svg>
           </button>
         </div>
-        <div id="map"></div>
-        <div id="content">
-          <div class="circle"></div>
-        </div>
-        <button id="search-route-btn" class="btn toggle">Search Route</button>
-        <div class="info-text-group">
-          <p class="info-text">Firstname: <span id="info-firstname">Anthony</span></p>
-          <p class="info-text">Lastname: <span id="info-lastname">Martial</span></p>
-          <p class="info-text">Email: <span id="info-email">martial11@manutd.com</span></p>
-          <p class="info-text">Business Name: <span id="info-business-name">Anthony Fondou & Tea</span></p>
-          <p class="info-text">Address: <span id="info-address">Manchester, England</span></p>
-          <p class="info-text">Location: 
-            <span id="lat-value">0.00</span><span>, </span><span id="lng-value">0.00</span>
-          </p>
+        <div class="modal-content">
+          <div id="map"></div>
+          <!-- <div id="content">
+            <div class="circle"></div>
+          </div> -->
+          <div class="travel-mode-group">
+            <button type="button" value="WALKING" id="walking" class="btn toggle route-btn fas fa-walking"></button>
+            <button type="button" value="DRIVING" id="driving" class="btn toggle route-btn fas fa-car"></button>
+            <button type="button" value="TRANSIT" id="transit" class="btn toggle route-btn fas fa-bus-alt"></button>
+            <button type="button" value="BICYCLING" id="bicycling" class="btn toggle route-btn fas fa-bicycle"></button>
+          </div>
+          <div class="travel-mode-group" id="route-info">
+            <span id="tra-dis" class="travel-detail distance">-.-- mi</span>
+            <span id="tra-dur" class="travel-detail duration">-.-- min</span>
+          </div>
+          <div class="info-text-group" style="display:none;">
+            <p class="info-text">Firstname: <span id="info-firstname">Anthony</span></p>
+            <p class="info-text">Lastname: <span id="info-lastname">Martial</span></p>
+            <p class="info-text">Email: <span id="info-email">martial11@manutd.com</span></p>
+            <p class="info-text">Business Name: <span id="info-business-name">Anthony Fondou & Tea</span></p>
+            <p class="info-text">Address: <span id="info-address">Manchester, England</span></p>
+            <p class="info-text">Location: 
+              <span id="lat-value">0.00</span><span>, </span><span id="lng-value">0.00</span>
+            </p>
+          </div>
         </div>
       </div>
       <div id="close-modal-backdrop" class="modal-backdrop"></div>
@@ -70,7 +82,7 @@
   
   <script src="map.js" type="text/javascript"></script>
   <!-- <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script> -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDPYXPk8Hwp9dOGcKsFAg7NBHCELBfXEkE&callback=initMap"
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDPYXPk8Hwp9dOGcKsFAg7NBHCELBfXEkE&callback=initMap&libraries=places"
   type="text/javascript"></script>
 </body>
 </html>
